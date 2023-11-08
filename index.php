@@ -1,4 +1,5 @@
 <?php
+session_start();
 include('includes/conexion.php');
 conectar();
 ?>
@@ -10,6 +11,7 @@ conectar();
 <head>
     <meta charset="UTF-8">
     <title>Concurso de disfraces de Halloween</title>
+
     <link rel="stylesheet" href="css/estilos.css">
 </head>
 
@@ -25,6 +27,15 @@ conectar();
     </nav>
     <header>
         <h1>Concurso de disfraces de Halloween</h1>
+        <?php
+        if(!empty($_SESSION['nombre_usuario']))
+        {
+            ?>
+            <p>Hola <?php echo $_SESSION['nombre_usuario'] ;?></p>
+            <a href="index.php?modulo=procesar_login&salir=ok">SALIR</a>
+            <?php
+        }
+        ?>
     </header>
     <main>
         <?php
@@ -47,7 +58,21 @@ conectar();
                                 <p><?php echo $r['descripcion'];?></p>
                                 <p>Votos: <?php echo $r['votos'];?></p>
                                 <p><img src="imagenes/<?php echo $r['foto'];?>" width="100%"></p>
-                                <button class="votar">Votar</button>
+                                <?php
+                                    if(!empty($_SESSION['nombre_usuario']))
+                                    {
+                                    $sql_votos = "SELECT *FROM  votos where id_disfraz =".$r['id']." and id_usuario=".$_SESSION['id'];
+                                    $sql_votos = mysqli_query($con, $sql_votos);
+                                    if (mysqli_num_rows($sql_votos) == 0)
+                                        {
+                                            ?>
+                                            <form method="POST" action="index.php?modulo=procesar_votos&id_disfraz=<?php echo $r['id']; ?>" >
+                                            <button class = "votar">Votar</button>
+                                            </form>
+                                            <?php
+                                        }
+                                    }    
+                                ?>
                             </div>
                         </section>
                         <?php

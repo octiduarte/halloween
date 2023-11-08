@@ -2,7 +2,7 @@
 if(isset($_POST["nombre"]) && isset($_POST["clave"]))
 {
     //verifico que no exista el usuario
-    $sql = "SELECT *FROM usuarios where nombre = ' ".$_POST['nombre']." ' ";
+    $sql = "SELECT *FROM usuarios where nombre = '".$_POST['nombre']."'";
     $sql = mysqli_query($con, $sql);
     if(mysqli_num_rows($sql)!= 0)
     {
@@ -11,7 +11,7 @@ if(isset($_POST["nombre"]) && isset($_POST["clave"]))
     else
     {
         //inserto nuevo usuario
-        $sql = "INSERT INTO usuarios (nombre,clave) values (' ".$_POST['nombre']." ',' ".$_POST['clave']. " ')";
+        $sql = "INSERT INTO usuarios (nombre,clave) values ('".$_POST['nombre']."','".$_POST['clave']. "')";
         $sql = mysqli_query($con, $sql);
         if(mysqli_error($con))
         {
@@ -22,6 +22,7 @@ if(isset($_POST["nombre"]) && isset($_POST["clave"]))
                 echo "<script> alert('Registro insertado con exito');</script>";
             }
     }    
+    echo "<script>window.location='index.php?modulo=procesar_registro';</script>";
 }
 ?>
 
