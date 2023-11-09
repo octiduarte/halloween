@@ -1,21 +1,23 @@
 <?php
 session_start();
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
+
 include('includes/conexion.php');
 conectar();
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <title>Concurso de disfraces de Halloween</title>
-
     <link rel="stylesheet" href="css/estilos.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 </head>
 
 <body>
+    <div id="consola"></div>
     <nav>
         <ul>
             <li><a href="index.php">Inicio</a></li>
@@ -28,67 +30,78 @@ conectar();
     <header>
         <h1>Concurso de disfraces de Halloween</h1>
         <?php
-        if(!empty($_SESSION['nombre_usuario']))
-        {
-            ?>
-            <p>Hola <?php echo $_SESSION['nombre_usuario'] ;?></p>
-            <a href="index.php?modulo=procesar_login&salir=ok">SALIR</a>
-            <?php
-        }
+        if (isset($_SESSION['nombre_usuario'])) {
         ?>
+            <div class="sesion">
+                <p>
+                    <?php echo $_SESSION['nombre_usuario'] ?> , Usted tiene el ID:
+                    <?php echo $_SESSION['id']; ?>
+                </p>
+            </div>
+            <a href="index.php?modulo=procesar_login&salir=ok">Salir </a>
+        <?php
+
+        } ?>
     </header>
     <main>
         <?php
-        if (!empty($_GET['modulo'])) 
-        {
+        if (!empty($_GET['modulo'])) {
             include('modulos/' . $_GET['modulo'] . '.php');
-        } 
-            else
-            {
-                $sql = "SELECT *FROM disfraces ORDER BY votos DESC";
-                $sql = mysqli_query($con, $sql);
-                if (mysqli_num_rows($sql) != 0) 
-                {
-                    while($r = mysqli_fetch_array($sql))
-                    {
-                        ?>
-                        <section id="disfraces-list" class="section">
-                            <div class="disfraz">
-                                <h2><?php echo $r['nombre'];?></h2>
-                                <p><?php echo $r['descripcion'];?></p>
-                                <p>Votos: <?php echo $r['votos'];?></p>
-                                <p><img src="imagenes/<?php echo $r['foto'];?>" width="100%"></p>
-                                <?php
-                                    if(!empty($_SESSION['nombre_usuario']))
-                                    {
-                                    $sql_votos = "SELECT *FROM  votos where id_disfraz =".$r['id']." and id_usuario=".$_SESSION['id'];
-                                    $sql_votos = mysqli_query($con, $sql_votos);
-                                    if (mysqli_num_rows($sql_votos) == 0)
-                                        {
-                                            ?>
-                                            <form method="POST" action="index.php?modulo=procesar_votos&id_disfraz=<?php echo $r['id']; ?>" >
-                                            <button class = "votar">Votar</button>
-                                            </form>
-                                            <?php
-                                        }
-                                    }    
-                                ?>
-                            </div>
-                        </section>
-                        <?php
+        } else {
+            $sql = "SELECT * FROM disfraces WHERE eliminado=0 ORDER BY votos DESC";
+            $sql = mysqli_query($con, $sql);
+            if (mysqli_num_rows($sql) != 0) {
+        ?>
+                <section id="disfraces-list" class="section">
+                    <?php
+                    while ($r = mysqli_fetch_assoc($sql)) {
+                    ?>
+                        <div class="disfraz">
+                            <h2>
+                                <?php echo $r['nombre']; ?>
+                            </h2>
+                            <p>
+                                <?php echo $r['descripcion']; ?>
+                            </p>
+                            <p>Votos:
+                                <?php echo $r['votos']; ?>
+                            </p>
+
+                            <p><img src="imagenes/<?php echo $r['foto']; ?>" width="100%"></p>
+                            <p>FOTO BLOB</p>
+                            <p><img src="modulos/mostrar_foto.php?id=<?php echo $r['id']; ?>" width="100%"></p>
+                            <?php
+                            if (!empty($_SESSION['nombre_usuario'])) {
+                                $sql_votos = "SELECT *FROM votos where id_disfraz=" . $r['id'] . " and id_usuario=" . $_SESSION['id'];
+                                $sql_votos = mysqli_query($con, $sql_votos);
+                                if (mysqli_num_rows($sql_votos) == 0) {
+                            ?>
+                                    <button class="votar" id="votarBoton<?php echo $r['id']; ?>" onclick="votar(<?php echo $r['id']; ?>)">Votar </button>
+                            <?php
+                                }
+                            }
+                            ?>
+                        </div>
+                        <hr>
+                    <?php
                     }
-                }
-                    else 
-                    {
-                        ?>
-                        <section id="disfraces-list" class="section">
-                            <div class="disfraz">
-                                <h2>No hay datos</h2>
-                            </div>
-                        </section>
-                        <?php
-                    }
+                    ?>
+                </section>
+            <?php
+
+            } else {
+            ?>
+                <section id="disfraces-list" class="section">
+                    <!-- Aquí se mostrarán los disfraces -->
+                    <div class="disfraz">
+                        <h2>No hay datos</h2>
+                    </div>
+                    <hr>
+
+                </section>
+        <?php
             }
+        }
         ?>
     </main>
     <script src="js/script.js"></script>
